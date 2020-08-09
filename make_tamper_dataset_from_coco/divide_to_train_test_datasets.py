@@ -35,4 +35,5 @@ def divide(train_percent):
     print('总共数据有：%d张',len(data_list))
     print('训练:测试 = %d:%d'.format(train_percent,10-train_percent))
     random.sample(data_list,len(data_list))
-    random.sample(data_list,len(data_list) * train_percent)
+    train_set = random.sample(data_list,len(data_list) * train_percent)
+    test_set = list(set(data_list).difference(set(train_set)))
