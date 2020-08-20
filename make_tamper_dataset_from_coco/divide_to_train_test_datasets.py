@@ -7,8 +7,9 @@ import random
 import os
 import sys
 import datetime
-DATASET_SRC_PATH = ''
-DATASET_TARGET_PATH = ''
+import shutil
+DATASET_SRC_PATH = 'C:\\Users\\musk\\Desktop\\test_cp\\tamper_poisson_result'
+DATASET_TARGET_PATH = 'C:\\Users\\musk\\Desktop\\test_cp\\New3'
 
 def divide(train_percent):
     if not os.path.exists(DATASET_SRC_PATH):
@@ -17,10 +18,10 @@ def divide(train_percent):
     if not os.path.exists(DATASET_TARGET_PATH):
         print('目标路径不存在，准备创建...')
         os.mkdir(DATASET_TARGET_PATH)
-        os.mkdir(os.path.join(DATASET_TARGET_PATH, 'train_dataset_train_percent_%d@%d_%d'.format(train_percent,
+        os.mkdir(os.path.join(DATASET_TARGET_PATH, 'train_dataset_train_percent_%.2f@%d_%d'%(train_percent,
                                                                                                  datetime.datetime.now().month,
                                                                                                  datetime.datetime.now().day)))
-        os.mkdir(os.path.join(DATASET_TARGET_PATH, 'test_dataset_train_percent_%d@%d_%d'.format(train_percent,
+        os.mkdir(os.path.join(DATASET_TARGET_PATH, 'test_dataset_train_percent_%.2f@%d_%d'%(train_percent,
                                                                                                  datetime.datetime.now().month,
                                                                                                  datetime.datetime.now().day)))
     else:
@@ -32,8 +33,22 @@ def divide(train_percent):
             sys.exit(1)
 
     data_list = os.listdir(DATASET_SRC_PATH)
-    print('总共数据有：%d张',len(data_list))
-    print('训练:测试 = %d:%d'.format(train_percent,10-train_percent))
-    random.sample(data_list,len(data_list))
-    train_set = random.sample(data_list,len(data_list) * train_percent)
+    print('总共数据有：%d张'%len(data_list))
+    print('训练:测试 = %d:%d'%(train_percent*10,10-train_percent))
+    data_list = random.sample(data_list,len(data_list))
+    train_set = random.sample(data_list,int(len(data_list) * train_percent))
     test_set = list(set(data_list).difference(set(train_set)))
+    print(train_set)
+    print(test_set)
+    for index,train in enumerate(train_set):
+        shutil.copy(os.path.join(DATASET_SRC_PATH,train),os.path.join(DATASET_TARGET_PATH,'train_dataset_train_percent_%.2f@%d_%d'%(train_percent,
+                                                                                                 datetime.datetime.now().month,
+                                                                                                 datetime.datetime.now().day)))
+        print(index,'/',len(train_set))
+    for index,test in enumerate(test_set):
+        shutil.copy(os.path.join(DATASET_SRC_PATH,test),os.path.join(DATASET_TARGET_PATH,'test_dataset_train_percent_%.2f@%d_%d'%(train_percent,
+                                                                                                 datetime.datetime.now().month,
+                                                                                                 datetime.datetime.now().day)))
+
+if __name__ == '__main__':
+    divide(0.7)
