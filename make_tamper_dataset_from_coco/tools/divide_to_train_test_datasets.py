@@ -57,6 +57,8 @@ def divide(train_percent,train_num=None):
         shutil.copy(os.path.join(DATASET_SRC_PATH,train),os.path.join(DATASET_TARGET_PATH,'train_dataset_train_percent_%.2f@%d_%d'%(train_percent,
                                                                                                  datetime.datetime.now().month,
                                                                                                  datetime.datetime.now().day)))
+
+        
         print('train_dataset:',index,'/',len(train_set))
     for index,test in enumerate(test_set):
         if train_num != None:
