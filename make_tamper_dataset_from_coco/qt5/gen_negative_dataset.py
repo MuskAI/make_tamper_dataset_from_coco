@@ -89,7 +89,11 @@ class NegativeDataset():
         :return:
         """
         return np.zeros([target_shape[0],target_shape[1]],dtype='uint8')
-
+    def rename(self,path):
+        for index, item in enumerate(os.listdir(path)):
+            os.rename(os.path.join(path,item),os.path.join(path,'negative_'+item))
+            print('\r', 'The rename process: %d/%d'%(index, len(os.listdir(path))),end='')
 if __name__ == '__main__':
-    NegativeDataset().coco(in_path='D:\\实验室\\图像篡改检测\\数据集\\COCO\\train2017',
-                           save_path='D:\\实验室\\图像篡改检测\\数据集\\COCO_320_CROP',number=10000)
+    # NegativeDataset().coco(in_path='D:\\实验室\\图像篡改检测\\数据集\\COCO\\train2017',
+    #                        save_path='D:\\实验室\\图像篡改检测\\数据集\\COCO_320_CROP',number=10000)
+    NegativeDataset().rename(r'H:\10月数据准备\10月12日实验数据\negative\COCO_320_CROP')

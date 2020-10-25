@@ -5,7 +5,7 @@ description: 从公开数据生成数据集
 1. CASIA 1.0 2.0
 2. Coverage
 """
-import os,sys
+import os, sys
 import cv2 as cv
 from PIL import Image
 import traceback
@@ -15,10 +15,12 @@ import shutil
 import skimage.morphology as dilation
 import matplotlib.pyplot as plt
 
+
 class PublicDataset():
     def __init__(self):
         pass
-    def casia1(self,in_path_src=None,in_path_gt=None, save_path=None):
+
+    def casia1(self, in_path_src=None, in_path_gt=None, save_path=None):
         """
         casia1 tamper 数据文件夹目录：1.CM 2.Sp
         CM文件组成： src: name ;gt: name_gt
@@ -28,7 +30,7 @@ class PublicDataset():
         :return:
         """
         # 0 有效性判断
-        PublicDataset.__casia_path_check(self,in_path_src, in_path_gt,save_path)
+        PublicDataset.__casia_path_check(self, in_path_src, in_path_gt, save_path)
 
         # 1 check src and gt
         src_list = os.listdir(in_path_src)
@@ -36,27 +38,27 @@ class PublicDataset():
         unmatched_list = []
         matched_list = []
         for src_name in src_list:
-            gt_name = src_name.split('.')[0]+'_gt'+'.png'
+            gt_name = src_name.split('.')[0] + '_gt' + '.png'
             print('The gt_name is :', gt_name)
             if gt_name not in gt_list:
-                print('src:[%s] with gt:[%s] not match'%(src_name, gt_name))
+                print('src:[%s] with gt:[%s] not match' % (src_name, gt_name))
                 unmatched_list.append(gt_name)
 
         if len(unmatched_list) == 0:
             print('All the data match successfully!')
         else:
             print('There are some data not match, the unmatched number is : %d, the percent is %d/%d'
-                  % (len(unmatched_list),  len(unmatched_list), len(src_list)))
+                  % (len(unmatched_list), len(unmatched_list), len(src_list)))
             print(unmatched_list)
             print(unmatched_list[:][1])
             for item in src_list:
-                if item.split('.')[0]+'_gt'+'.png' not in unmatched_list:
+                if item.split('.')[0] + '_gt' + '.png' not in unmatched_list:
                     matched_list.append(item)
-                    shutil.copyfile(src=os.path.join(in_path_src, item), dst=os.path.join(save_path+'\\src', item))
+                    shutil.copyfile(src=os.path.join(in_path_src, item), dst=os.path.join(save_path + '\\src', item))
 
         # 2 generate gt from gt_list and save it
         for index, gt_name in enumerate(matched_list):
-            gt = Image.open(os.path.join(in_path_gt, gt_name.split('.')[0]+'_gt'+'.png'))
+            gt = Image.open(os.path.join(in_path_gt, gt_name.split('.')[0] + '_gt' + '.png'))
             gt = np.array(gt)
             if gt.shape[-1] == 3 or gt.shape[-1] == 4:
                 gt = gt[:, :, 0]
@@ -72,12 +74,12 @@ class PublicDataset():
             # plt.show()
             ################
             out_gt = Image.fromarray(out_gt)
-            out_gt.save(os.path.join(save_path + '\\gt', gt_name.split('.')[0]+'_gt'+'.png'))
+            out_gt.save(os.path.join(save_path + '\\gt', gt_name.split('.')[0] + '_gt' + '.png'))
             print('\r', 'gt generate process: {:d}/{:d}'.format(index, len(gt_list)), end='')
 
         return True
 
-    def size_statistics(self,statistics_path=None, target_size=(320,320)):
+    def size_statistics(self, statistics_path=None, target_size=(320, 320)):
         if statistics_path == None:
             print('Please input a useful path')
             sys.exit()
@@ -94,12 +96,14 @@ class PublicDataset():
                 if img.size[0] >= target_size[0] and img.size[1] >= target_size[1]:
                     required_img_list.append(item)
             print('End statistics')
-            print('The statistics result: (required:all) = (%d:%d)'%(len(required_img_list), len(os.listdir(statistics_path))))
+            print('The statistics result: (required:all) = (%d:%d)' % (
+            len(required_img_list), len(os.listdir(statistics_path))))
 
         # 开始搬运
         dst = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\gt'
         for item in required_img_list:
             shutil.copyfile(os.path.join(statistics_path, item), os.path.join(dst, item))
+
     def __mask_to_double_edge(self, orignal_mask):
         """
         :param orignal_mask:
@@ -120,13 +124,14 @@ class PublicDataset():
             double_edge = np.where(double_edge_candidate == 2, 1, 0)
             ground_truth = np.where(double_edge == 1, 255, 0) + np.where(difference_8 == 1, 100, 0) + np.where(
                 mask == 1, 50, 0)  # 所以内侧边缘就是100的灰度值
-            ground_truth = np.where(ground_truth==305,255,ground_truth)
+            ground_truth = np.where(ground_truth == 305, 255, ground_truth)
             ground_truth = np.array(ground_truth, dtype='uint8')
             return ground_truth
 
         except Exception as e:
             print(e)
-    def __casia_path_check(self,in_path_src, in_path_gt, save_path):
+
+    def __casia_path_check(self, in_path_src, in_path_gt, save_path):
         if in_path_src == None:
             print('You should giving a useful casia1 src path')
             traceback.print_exc()
@@ -157,27 +162,27 @@ class PublicDataset():
             os.mkdir(save_path)
             os.mkdir(os.path.join(save_path, 'src'))
             os.mkdir(os.path.join(save_path, 'gt'))
-    def casia_crop(self,in_path_src,in_path_gt, save_path):
+
+    def casia_crop(self, in_path_src, in_path_gt, save_path):
         """
         :param in_path:该目录存在两个文件夹src gt
         :param save_path: 该目录需要自动创建两个文件夹src_after_320crop gt_after_320crop
         :return:
         """
         # 0 check path
-        PublicDataset.__casia_path_check(self,in_path_src=in_path_src, in_path_gt=in_path_gt, save_path=save_path)
+        PublicDataset.__casia_path_check(self, in_path_src=in_path_src, in_path_gt=in_path_gt, save_path=save_path)
         in_src_list = os.listdir(in_path_src)
         in_gt_list = os.listdir(in_path_gt)
 
-        for src_name in in_src_list:
-            gt_name = src_name.split('.')[0]+'_gt'+'.png'
-            if gt_name in in_path_gt:
-                print('yes')
+        for index, src_name in enumerate(in_src_list):
+            gt_name = src_name.split('.')[0] + '_gt' + '.png'
+            if gt_name in in_gt_list:
                 pass
             else:
                 print('match error,please check the file')
             try:
-                img = Image.open(os.path.join(in_path_src,src_name))
-                gt = Image.open(os.path.join(in_path_gt,gt_name))
+                img = Image.open(os.path.join(in_path_src, src_name))
+                gt = Image.open(os.path.join(in_path_gt, gt_name))
             except:
                 print('error!')
                 continue
@@ -185,14 +190,23 @@ class PublicDataset():
             # 1 check img and gt
             img = np.array(img)
             gt = np.array(gt)
+            # print(img.shape, gt.shape)
             crop320_src, crop320_gt = PublicDataset.__crop(self, img=img, gt=gt)
-            plt.figure('check crop320_src')
-            plt.imshow(crop320_src)
-            plt.show()
+            crop320_src = Image.fromarray(crop320_src)
+            crop320_gt = Image.fromarray(crop320_gt)
+            # plt.figure('check crop320_src')
+            # plt.imshow(crop320_src)
+            # plt.show()
+            #
+            # plt.figure('check crop320_gt')
+            # plt.imshow(crop320_gt)
+            # plt.show()
+            t_save_src = os.path.join(save_path + '\\\\src', src_name.split('.')[0] + '.png')
 
-            plt.figure('check crop320_gt')
-            plt.imshow(crop320_gt)
-            plt.show()
+            crop320_gt.save(os.path.join(save_path + '\\\\gt', gt_name.split('.')[0] + '.png'))
+            crop320_src.save(os.path.join(save_path + '\\\\src', src_name.split('.')[0] + '.png'))
+            print('\r', 'The process of crop is :%d/%d' % (index, len(in_src_list)), end='')
+
     def __crop(self, img, gt, target_shape=(320, 320)):
         img_shape = img.shape
         height = img_shape[0]
@@ -200,19 +214,25 @@ class PublicDataset():
         random_height_range = height - target_shape[0]
         random_width_range = width - target_shape[1]
 
-        if random_width_range < 1 or random_height_range < 1:
+        if random_width_range < 0 or random_height_range < 0:
             return img
-        random_height = np.random.randint(0, random_height_range)
-        random_width = np.random.randint(0, random_width_range)
+        if random_height_range == 0:
+            random_height = 0
+        else:
+            random_height = np.random.randint(0, random_height_range)
+        if random_width_range == 0:
+            random_width = 0
+        else:
+            random_width = np.random.randint(0, random_width_range)
 
-        return img[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]],\
+        return img[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]], \
                gt[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]]
+
+
 if __name__ == '__main__':
     #
     in_path_src = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\src'
     in_path_gt = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\gt'
-    save_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_AFTER_320CROP1'
+    save_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_AFTER_320CROP'
     # # The input save_path is a root path ,which contain src dir and gt dir
     # PublicDataset().casia1(in_path_src, in_path_gt, save_path)
-    # PublicDataset().size_statistics('D:\\实验室\\图像篡改检测\\篡改检测公开数据\\CASIA2.0_MYGT\\gt')
-    PublicDataset().casia_crop(in_path_src,in_path_gt,save_path)
