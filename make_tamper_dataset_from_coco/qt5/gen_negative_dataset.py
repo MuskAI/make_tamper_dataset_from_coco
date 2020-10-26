@@ -93,6 +93,32 @@ class NegativeDataset():
         for index, item in enumerate(os.listdir(path)):
             os.rename(os.path.join(path,item),os.path.join(path,'negative_'+item))
             print('\r', 'The rename process: %d/%d'%(index, len(os.listdir(path))),end='')
+
+    def negative_plus(self,dir_path):
+        """
+        using this function to solve nan problem,
+        but i use it to deal with splicing data which is the negative gt
+        :param dir_path:
+        :return:
+        """
+        gt_list = os.listdir(dir_path)
+        gt_list = [os.path.join(dir_path, item) for item in gt_list]
+        for index, item in enumerate(gt_list):
+            try:
+                I = Image.open(item)
+                if len(I.split()) == 3:
+                    I = I.split()[0]
+                else:
+                    pass
+                I = np.array(I,dtype='uint8')
+                if I.max() == 0:
+                    I[0,0] = 255
+                    I = Image.fromarray(I)
+                    I.save(item)
+                else:
+                    pass
+            except:
+                traceback.print_exc()
 if __name__ == '__main__':
     # NegativeDataset().coco(in_path='D:\\实验室\\图像篡改检测\\数据集\\COCO\\train2017',
     #                        save_path='D:\\实验室\\图像篡改检测\\数据集\\COCO_320_CROP',number=10000)
