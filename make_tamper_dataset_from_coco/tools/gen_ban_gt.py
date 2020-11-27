@@ -18,7 +18,7 @@ class GenBandGt():
                 # gt = GenBandGt.__input_ruler(self, path=os.path.join(gt_dir,item) , open_type='cv2')
                 print(os.path.join(gt_dir,item))
                 gt = Image.open(os.path.join(gt_dir,item))
-                gt = cv.cvtColor(np.asarray(gt), cv.COLOR_RGB2BGR)
+                gt = cv.cvtColor(np.asarray(gt), cv.COLOR_GRAY2BGR)
                 gt = np.array(gt)
                 print(gt.shape)
                 gt = np.array(np.where((gt==255) | (gt==100),255,0),dtype='uint8')[:,:,0:3]
@@ -65,6 +65,6 @@ class GenBandGt():
             image.save(path)
 
 if __name__ == '__main__':
-    gt_dir = 'H:\\10月数据准备\\10月12日实验数据\\casia\\gt'
-    save = 'H:\\10月数据准备\\10月12日实验数据\\casia\\band_save'
+    gt_dir = '/media/liu/File/10月数据准备/10月12日实验数据/cm/test_gt_train_percent_0.80@8_20'
+    save = '/media/liu/File/10月数据准备/10月12日实验数据/cm/band_save'
     GenBandGt().gen_band_gt(gt_dir,save)

@@ -485,7 +485,7 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
     return True
 
 
-def main(cat_range=[    1, 80], num_per_cat=100, area_constraint=[1000, 9999], optimize_constraint=False,
+def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optimize_constraint=False,
          save_root_path=None, dataset_root=None):
     cycle_flag = 0
     pylab.rcParams['figure.figsize'] = (10.0, 8.0)

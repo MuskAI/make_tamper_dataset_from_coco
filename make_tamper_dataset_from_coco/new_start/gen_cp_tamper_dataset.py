@@ -335,7 +335,6 @@ def random_area_to_background(background, mask, tamper_num =1):
         else:
             break
 
-
     # 判断object和bg的大小是否符合要求
     if paste_area[0] < 5 or paste_area[1] < 5:
         print('提醒：允许的粘贴区域太小')
@@ -352,14 +351,10 @@ def random_area_to_background(background, mask, tamper_num =1):
         bk_area = np.zeros((background_shape[0], background_shape[1],3), dtype='uint8')
         bk_mask[row2:row2+object_area_shape[0], col2:col2+object_area_shape[1]] = cut_mask
         bk_area[row2:row2 + object_area_shape[0], col2:col2 + object_area_shape[1], :] = cut_area
-
-
-
         background[:,:,0] = background[:,:,0] * np.where(bk_mask==1,0,1)
         background[:, :, 1] = background[:, :, 1] * np.where(bk_mask==1,0,1)
         background[:, :, 2] = background[:, :, 2] * np.where(bk_mask==1,0,1)
         background = background + bk_area
-
         tamper_image.append(background)
         tamper_mask.append(bk_mask)
     # 调用save_method保存
@@ -451,11 +446,8 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
         if not os.path.isfile(save_name['tamper_result']):
             print(save_name['tamper_result'])
             if tamper_image is not None:
-                if type(tamper_image) == 'PIL':
-                    tamper_image.save(save_name['tamper_result'])
-                else:
-                    tamper_image = cv2.cvtColor(np.asarray(tamper_image),cv2.COLOR_RGB2BGR)
-                    cv2.imwrite(save_name['tamper_result'], tamper_image)
+                # tamper_image.save(save_name['tamper_result'])
+                cv2.imwrite(save_name['tamper_result'], tamper_image)
             else:
                 traceback.print_exc()
                 sys.exit()
@@ -485,33 +477,26 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
     return True
 
 
-def main(cat_range=[    1, 80], num_per_cat=100, area_constraint=[1000, 9999], optimize_constraint=False,
+def main(cat_range=[1, 80], num_per_cat=2000, area_constraint=[1000, 9999], optimize_constraint=False,
          save_root_path=None, dataset_root=None):
     cycle_flag = 0
     pylab.rcParams['figure.figsize'] = (10.0, 8.0)
     dataset_root = 'D:\\实验室\\图像篡改检测\\数据集\\COCO\\'
-    save_root_path = 'C:\\Users\\musk\\Desktop\\test_cp'
+    save_root_path = 'C:\\Users\\musk\\Desktop\\fix_bk'
     if dataset_root == None:
         print('输入的数据集为空')
         sys.exit()
     else:
         dataDir = dataset_root
 
-
-    dataType = 'train2017'
+    # dataDir = '/media/musk/File/实验室/图像篡改检测/数据集/COCO'
+    dataType = 'val2017'
     annFile = '%s/annotations/instances_%s.json' % (dataDir, dataType)
     coco = COCO(annFile)
     cats = coco.loadCats(coco.getCatIds())
-    count_cat = -1
-    count_num = 0
-
     for cat in cats[cat_range[0]:cat_range[1]]:
-        count_cat+=1
         for num in range(num_per_cat):
-            count_num+=1
             try:
-                start_time = time.time()
-
 
                 catIds = coco.getCatIds(catNms=[cat['name']])
                 imgIds = coco.getImgIds(catIds=catIds)
@@ -570,9 +555,7 @@ def main(cat_range=[    1, 80], num_per_cat=100, area_constraint=[1000, 9999], o
                 image_save_method(tamper_image=tamper_raw_image[0], tamper_poisson=tamper_poisson_image[0],
                                   ground_truth=ground_truth[0], img=img, img1=img1, save_path=save_root_path,
                                   cat=cat['name'])
-                end_time = time.time()
-                co_time = end_time - start_time
-                print('count_cat:%d' % count_cat, '+++++++', 'count_num:%d' % count_num,'======','time:%.2f'%co_time)
+
             except Exception as e:
                 print(e)
     print('finished')

@@ -292,122 +292,14 @@ def paste_object_to_background(foreground, background, mask, bbox, tamper_num=1,
 
 
 
-def random_area_to_background(background, mask, tamper_num =1):
+def random_area_to_background(foreground, background, mask, ):
     """
-    输入一张背景图和一张mask图，该mask图的size不应需要与背景图一致
+    similar to up
+    :param foreground:
     :param background:
-    :param mask: mask任意一个前景图的mask
-    :param tamper_num :篡改的数量，默认为1
-    :return: 篡改好了的图像和一张GT 是list
+    :param mask:
+    :return:
     """
-
-    # 找到mask 的矩形区域
-    oringal_background = background.copy()
-
-
-    a = mask
-    a = np.where(a != 0 )
-    bbox = np.min(a[0]), np.min(a[1]), np.max(a[0]),np.max(a[1])
-    cut_mask = mask[bbox[0]:bbox[2], bbox[1]:bbox[3]]
-
-    # 以左上角的点作为参考点，计算可以paste的区域
-    background_shape = background.shape
-    object_area_shape = cut_mask.shape
-    paste_area = [background_shape[0] - object_area_shape[0], background_shape[1] - object_area_shape[1]]
-    print('the permit paste area is :', paste_area)
-    row1 = np.random.randint(0, paste_area[0])
-    col1 = np.random.randint(0, paste_area[1])
-
-
-    # 在background上获取mask的区域
-    temp_background = background.copy()
-    cut_area = temp_background[row1:row1+object_area_shape[0],col1:col1+object_area_shape[1],:]
-    cut_area[:,:,0] = cut_area[:,:,0] * cut_mask
-    cut_area[:, :, 1] = cut_area[:, :, 1] * cut_mask
-    cut_area[:, :, 2] = cut_area[:, :, 2] * cut_mask
-
-
-    for i in range(3):
-        row2 = np.random.randint(0, paste_area[0])
-        col2 = np.random.randint(0, paste_area[1])
-        if abs(row1-row2) + abs(col1-col2) <50:
-            print('随机选到的区域太近，重新选择')
-        else:
-            break
-
-
-    # 判断object和bg的大小是否符合要求
-    if paste_area[0] < 5 or paste_area[1] < 5:
-        print('提醒：允许的粘贴区域太小')
-
-
-    # 随机在background上贴上该mask的区域，并且保证与原区域有一定的像素偏移,然后生成新的mask图
-
-    tamper_image = []
-    tamper_mask = []
-    tamper_gt = []
-    tamper_poisson=[]
-    for times in range(tamper_num):
-        bk_mask = np.zeros((background_shape[0],background_shape[1]), dtype='uint8')
-        bk_area = np.zeros((background_shape[0], background_shape[1],3), dtype='uint8')
-        bk_mask[row2:row2+object_area_shape[0], col2:col2+object_area_shape[1]] = cut_mask
-        bk_area[row2:row2 + object_area_shape[0], col2:col2 + object_area_shape[1], :] = cut_area
-
-
-
-        background[:,:,0] = background[:,:,0] * np.where(bk_mask==1,0,1)
-        background[:, :, 1] = background[:, :, 1] * np.where(bk_mask==1,0,1)
-        background[:, :, 2] = background[:, :, 2] * np.where(bk_mask==1,0,1)
-        background = background + bk_area
-
-        tamper_image.append(background)
-        tamper_mask.append(bk_mask)
-    # 调用save_method保存
-
-
-
-    for index, item in enumerate(tamper_image):
-
-        difference_8 = mask_to_outeedge(tamper_mask[index])
-        difference_8_dilation = dilation.binary_dilation(difference_8, np.ones((3, 3)))
-        difference_8_dilation = np.where(difference_8_dilation == True, 1, 0)
-        double_edge_candidate = difference_8_dilation + tamper_mask[index]
-        double_edge = np.where(double_edge_candidate == 2, 1, 0)
-        ground_truth = np.where(double_edge == 1, 255, 0) + np.where(difference_8 == 1, 100, 0) + np.where(
-            tamper_mask[index] == 1, 50, 0)  # 所以内侧边缘就是100的灰度值
-        tamper_gt.append(ground_truth)
-
-
-
-        try:
-            mask = Image.fromarray(tamper_mask[index])
-        except Exception as e:
-            print('mask to Image error', e)
-        # 在这里的时候，mask foreground background 尺寸都是一致的了，poisson融合时，offset置为0
-        foreground = Image.fromarray(bk_area)
-
-        background = Image.fromarray(oringal_background)
-        mask = bk_mask
-        try:
-            poisson_foreground = cv2.cvtColor(np.asarray(foreground.convert('RGB')), cv2.COLOR_RGB2BGR)
-            poisson_background = cv2.cvtColor(np.asarray(background), cv2.COLOR_RGB2BGR)
-            poisson_mask = np.asarray(mask)
-            poisson_mask = np.where(poisson_mask == 1, 255, 0)
-            poisson_fusion_image = poisson_image_editing.poisson_fusion(poisson_foreground, poisson_background,
-                                                                        poisson_mask)
-            poisson_fusion_image = Image.fromarray(cv2.cvtColor(poisson_fusion_image, cv2.COLOR_BGR2RGB))
-
-            #
-            # plt.figure('123')
-            # plt.imshow(poisson_fusion_image)
-            # plt.show()
-            tamper_poisson.append(poisson_fusion_image)
-            return tamper_image, tamper_poisson, tamper_gt
-
-        except Exception as e:
-            traceback.print_exc()
-
-
 
 
 def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, ground_truth=None, save_path=None,
@@ -451,11 +343,8 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
         if not os.path.isfile(save_name['tamper_result']):
             print(save_name['tamper_result'])
             if tamper_image is not None:
-                if type(tamper_image) == 'PIL':
-                    tamper_image.save(save_name['tamper_result'])
-                else:
-                    tamper_image = cv2.cvtColor(np.asarray(tamper_image),cv2.COLOR_RGB2BGR)
-                    cv2.imwrite(save_name['tamper_result'], tamper_image)
+                tamper_image.save(save_name['tamper_result'])
+            # cv2.imwrite(save_name['tamper_result'], tamper_image)
             else:
                 traceback.print_exc()
                 sys.exit()
@@ -464,7 +353,7 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
             print(save_name['tamper_poisson_result'])
             if tamper_poisson is not None:
                 tamper_poisson.save(save_name['tamper_poisson_result'])
-                # cv2.imwrite(save_name['tamper_poisson_result'], tamper_poisson)
+            # cv2.imwrite(save_name['tamper_poisson_result'], tamper_poisson)
             else:
                 traceback.print_exc()
                 sys.exit()
@@ -485,33 +374,26 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
     return True
 
 
-def main(cat_range=[    1, 80], num_per_cat=100, area_constraint=[1000, 9999], optimize_constraint=False,
+def main(cat_range=[1, 80], num_per_cat=2000, area_constraint=[1000, 9999], optimize_constraint=False,
          save_root_path=None, dataset_root=None):
     cycle_flag = 0
     pylab.rcParams['figure.figsize'] = (10.0, 8.0)
-    dataset_root = 'D:\\实验室\\图像篡改检测\\数据集\\COCO\\'
-    save_root_path = 'C:\\Users\\musk\\Desktop\\test_cp'
+    # dataDir = 'D:\\实验室\\图像篡改检测\\数据集\\COCO\\'
+
     if dataset_root == None:
         print('输入的数据集为空')
         sys.exit()
     else:
         dataDir = dataset_root
 
-
+    # dataDir = '/media/musk/File/实验室/图像篡改检测/数据集/COCO'
     dataType = 'train2017'
     annFile = '%s/annotations/instances_%s.json' % (dataDir, dataType)
     coco = COCO(annFile)
     cats = coco.loadCats(coco.getCatIds())
-    count_cat = -1
-    count_num = 0
-
     for cat in cats[cat_range[0]:cat_range[1]]:
-        count_cat+=1
         for num in range(num_per_cat):
-            count_num+=1
             try:
-                start_time = time.time()
-
 
                 catIds = coco.getCatIds(catNms=[cat['name']])
                 imgIds = coco.getImgIds(catIds=catIds)
@@ -548,10 +430,7 @@ def main(cat_range=[    1, 80], num_per_cat=100, area_constraint=[1000, 9999], o
 
                 # tamper_raw_image, tamper_poisson_image, ground_truth = splicing_tamper_one_image(I, b1, mask)
 
-
-                # tamper_raw_image, tamper_poisson_image, ground_truth = paste_object_to_background(I,b1,mask,bbx,1,False)
-                tamper_raw_image, tamper_poisson_image, ground_truth = random_area_to_background(b1,mask,1)
-
+                tamper_raw_image, tamper_poisson_image, ground_truth = paste_object_to_background(I,b1,mask,bbx,1,False)
                 # plt.figure('tamper_raw_image')
                 # plt.imshow(tamper_raw_image[0])
                 # plt.show()
@@ -570,9 +449,7 @@ def main(cat_range=[    1, 80], num_per_cat=100, area_constraint=[1000, 9999], o
                 image_save_method(tamper_image=tamper_raw_image[0], tamper_poisson=tamper_poisson_image[0],
                                   ground_truth=ground_truth[0], img=img, img1=img1, save_path=save_root_path,
                                   cat=cat['name'])
-                end_time = time.time()
-                co_time = end_time - start_time
-                print('count_cat:%d' % count_cat, '+++++++', 'count_num:%d' % count_num,'======','time:%.2f'%co_time)
+
             except Exception as e:
                 print(e)
     print('finished')

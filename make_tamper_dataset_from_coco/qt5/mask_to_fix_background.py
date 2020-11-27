@@ -713,7 +713,7 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
     cycle_flag = 0
     pylab.rcParams['figure.figsize'] = (10.0, 8.0)
     dataset_root = 'D:\\实验室\\图像篡改检测\\数据集\\COCO\\'
-    save_root_path = 'C:\\Users\\musk\\Desktop\\fix_bk'
+    save_root_path = 'D:\\实验室\\1127splicing'
     if dataset_root == None:
         print('输入的数据集为空')
         sys.exit()
@@ -747,7 +747,7 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
 
                 # 判断随机出来的两幅图像符不符合要求
                 if judge_required_image(anns[0]['area'], (img['height'], img['width']), (img1['height'], img1['width']),
-                                        1000, size_threshold=0.2):
+                                        min_area=1000, size_threshold=0.2):
                     cycle_flag += 1
                     print('循环的次数为:', cycle_flag)
                     if cycle_flag >= 50:
