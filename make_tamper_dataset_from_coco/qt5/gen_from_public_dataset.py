@@ -163,6 +163,38 @@ class PublicDataset():
             os.mkdir(os.path.join(save_path, 'src'))
             os.mkdir(os.path.join(save_path, 'gt'))
 
+    def __coverage_path_check(self, in_path_src, in_path_gt, save_path):
+        if in_path_src == None:
+            print('You should giving a useful coverage src path')
+            traceback.print_exc()
+            sys.exit()
+        else:
+            pass
+        if in_path_gt == None:
+            print('You should giving a useful coverage gt path')
+            traceback.print_exc()
+            sys.exit()
+        else:
+            pass
+
+        if save_path == None:
+            print('You should giving a useful save path')
+            traceback.print_exc()
+            sys.exit()
+
+        if os.path.exists(save_path):
+            if len(os.listdir(save_path)) != 0:
+                print('保存路径文件夹不为空，请重新输入')
+                sys.exit()
+            else:
+                if os.path.exists(os.path.join(save_path, 'src')) and os.path.exists(os.path.join(save_path, 'gt')):
+                    print('保存路径存在，满足要求')
+        else:
+            print('保存路径不存在，开始创建')
+            os.mkdir(save_path)
+            os.mkdir(os.path.join(save_path, 'src'))
+            os.mkdir(os.path.join(save_path, 'gt'))
+
     def casia_crop(self, in_path_src, in_path_gt, save_path):
         """
         :param in_path:该目录存在两个文件夹src gt
@@ -207,6 +239,50 @@ class PublicDataset():
             crop320_src.save(os.path.join(save_path + '\\\\src', src_name.split('.')[0] + '.png'))
             print('\r', 'The process of crop is :%d/%d' % (index, len(in_src_list)), end='')
 
+    def coverage_crop(self, in_path_src, in_path_gt, save_path):
+        """
+        :param in_path:该目录存在两个文件夹src gt
+        :param save_path: 该目录需要自动创建两个文件夹src_after_320crop gt_after_320crop
+        :return:
+        """
+        # 0 check path
+        PublicDataset.__coverage_path_check(self, in_path_src=in_path_src, in_path_gt=in_path_gt, save_path=save_path)
+        in_src_list = os.listdir(in_path_src)
+        in_gt_list = os.listdir(in_path_gt)
+
+        for index, src_name in enumerate(in_src_list):
+            gt_name = src_name.split('.')[0] + '_gt' + '.bmp'
+            if gt_name in in_gt_list:
+                pass
+            else:
+                print('match error,please check the file')
+            try:
+                img = Image.open(os.path.join(in_path_src, src_name))
+                gt = Image.open(os.path.join(in_path_gt, gt_name))
+            except:
+                print('error!')
+                continue
+                traceback.print_exc()
+            # 1 check img and gt
+            img = np.array(img)
+            gt = np.array(gt)
+            # print(img.shape, gt.shape)
+            crop320_src, crop320_gt = PublicDataset.__crop(self, img=img, gt=gt)
+            crop320_src = Image.fromarray(crop320_src)
+            crop320_gt = Image.fromarray(crop320_gt)
+            # plt.figure('check crop320_src')
+            # plt.imshow(crop320_src)
+            # plt.show()
+            #
+            # plt.figure('check crop320_gt')
+            # plt.imshow(crop320_gt)
+            # plt.show()
+            t_save_src = os.path.join(save_path + '\\src', src_name.split('.')[0] + '.png')
+
+            crop320_gt.save(os.path.join(save_path + '\\gt', gt_name.split('.')[0] + '.bmp'))
+            crop320_src.save(os.path.join(save_path + '\\src', src_name.split('.')[0] + '.bmp'))
+            print('\r', 'The process of crop is :%d/%d' % (index, len(in_src_list)), end='')
+
     def __crop(self, img, gt, target_shape=(320, 320)):
         img_shape = img.shape
         height = img_shape[0]
@@ -228,11 +304,94 @@ class PublicDataset():
         return img[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]], \
                gt[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]]
 
+    def coverage(self, in_path_src=None, in_path_gt=None, save_path=None):
+        """
+        coverage tamper 数据文件夹目录：1.CM 2.Sp
+        CM文件组成： src: name ;gt: name_gt
+        :param in_path_src:
+        :param in_path_gt:
+        :param save_path:
+        :return:
+        """
+        # 0 有效性判断
+        PublicDataset.__coverage_path_check(self, in_path_src, in_path_gt, save_path)
+
+        # 1 check src and gt
+        src_list = os.listdir(in_path_src)
+        src_list =[i for i in src_list if 't.' in i]
+        gt_list = os.listdir(in_path_gt)
+        unmatched_list = []
+        matched_list = []
+        for src_name in src_list:
+            if 't.' not in src_name:
+                continue
+
+            gt_name = src_name.split('t.')[0] + 'forged' +'.bmp'
+            print('The gt_name is :', gt_name)
+            if gt_name not in gt_list:
+                print('src:[%s] with gt:[%s] not match' % (src_name, gt_name))
+                unmatched_list.append(gt_name)
+
+        if len(unmatched_list) == 0:
+            print('All the data match successfully!')
+        else:
+            print('There are some data not match, the unmatched number is : %d, the percent is %d/%d'
+                  % (len(unmatched_list), len(unmatched_list), len(src_list)))
+            print(unmatched_list)
+            print(unmatched_list[:][1])
+
+        for item in src_list:
+            if item not in unmatched_list:
+                matched_list.append(item)
+                shutil.copyfile(src=os.path.join(in_path_src, item), dst=os.path.join(save_path + '\\src', item))
+
+        # 2 generate gt from gt_list and save it
+        for index, gt_name in enumerate(matched_list):
+            gt = Image.open(os.path.join(in_path_gt, gt_name.split('t.')[0] + 'forged' + '.bmp'))
+            print(gt)
+            gt = np.array(gt,dtype='uint8')
+            print(gt)
+            plt.imshow(gt)
+            plt.show()
+            if gt.shape[-1] == 3 or gt.shape[-1] == 4:
+                gt = gt[:, :, 0]
+                gt = np.where(gt > 0, 1, 0)
+            else:
+                pass
+            gt = np.where(gt > 0, 1, 0)
+            out_gt = PublicDataset.__mask_to_double_edge(self, gt)
+            # check out_gt
+            # print('The out_gt shape is :', out_gt.shape)
+            # plt.figure('out_gt')
+            # plt.imshow(out_gt)
+            # plt.show()
+            ################
+            out_gt = Image.fromarray(out_gt)
+            out_gt.save(os.path.join(save_path + '\\gt', gt_name.split('.')[0] + '_gt' + '.bmp'))
+            print('\r', 'gt generate process: {:d}/{:d}'.format(index, len(gt_list)), end='')
+
+        return True
+
+    def tif_to_bmp(self,in_path,out_path):
+        in_list = os.listdir(in_path)
+        for i in in_list:
+            # img = Image.open(os.path.join(in_path,i))
+            # img.save(os.path.join(out_path,i.replace('.tif','.bmp')))
+            # img = cv.imread(os.path.join(in_path, i))
+            img = cv.imdecode(np.fromfile(os.path.join(in_path, i), dtype=np.uint8), cv.IMREAD_UNCHANGED)  # 打开含有中文路径的图片
+
+            cv.namedWindow('show')
+            cv.imshow('show', img)
+            cv.waitKey(200)
+            cv.imencode('.bmp', img)[1].tofile(os.path.join(out_path,i)) # 保存图片
+
+            # cv.imwrite(os.path.join(out_path,i.replace('.tif','.bmp')),img)
 
 if __name__ == '__main__':
-    #
-    in_path_src = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\src'
-    in_path_gt = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\gt'
-    save_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_AFTER_320CROP'
+    in_path_src = r'D:\实验室\图像篡改检测\篡改检测公开数据\coverage\MY_COVERAGE_DATA\src'
+    in_path_gt = r'D:\实验室\图像篡改检测\篡改检测公开数据\coverage\MY_COVERAGE_DATA\gt'
+    save_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\coverage\MY_COVERAGE_DATA\AFTER_320_CROP'
+    # out_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\coverage\save_forged\forged_img'
     # # The input save_path is a root path ,which contain src dir and gt dir
-    # PublicDataset().casia1(in_path_src, in_path_gt, save_path)
+    PublicDataset().coverage_crop(in_path_src, in_path_gt, save_path)
+    # PublicDataset().tif_to_bmp(in_path_src, out_path)

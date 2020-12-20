@@ -15,7 +15,9 @@ import shutil
 import skimage.morphology as dilation
 import matplotlib.pyplot as plt
 
-
+def cv_imread(file_path):
+    cv_img = cv.imdecode(np.fromfile(file_path,dtype=np.uint8),-1)
+    return cv_img
 class PublicDataset():
     def __init__(self):
         pass
@@ -228,11 +230,28 @@ class PublicDataset():
         return img[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]], \
                gt[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]]
 
+class DataCheck:
+    def __init__(self,dir_path):
+        self.dir_path = dir_path
+    def channel(self):
+        for idx, item in enumerate(os.listdir(self.dir_path)):
+            img_path = os.path.join(self.dir_path, item)
+            # I = Image.open(img_path)
+            I = cv_imread(img_path)
+
+
+            # print(idx,' ',item)
+            # print(len(I.split()))
+
+            if I.shape[-1]!= 3:
+                print('the size of ',item,'is ',I.shape)
 
 if __name__ == '__main__':
     #
-    in_path_src = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\src'
-    in_path_gt = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_SELECTED\gt'
-    save_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_AFTER_320CROP'
+    in_path_src = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA\CASIA 2.0\CASIA 2.0\Tp'
+    in_path_gt = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA\casia2groundtruth-master\CASIA 2 Groundtruth'
+    save_path = r'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_GT'
+    check_path = 'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA2.0_DATA_FOR_TRAIN\src'
     # # The input save_path is a root path ,which contain src dir and gt dir
     # PublicDataset().casia1(in_path_src, in_path_gt, save_path)
+    DataCheck(check_path).channel()
