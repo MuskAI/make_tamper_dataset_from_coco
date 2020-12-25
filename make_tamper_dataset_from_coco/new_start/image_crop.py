@@ -13,19 +13,28 @@ def crop(img, target_shape=(320,320)):
     img_shape = img.shape
     height = img_shape[0]
     width = img_shape[1]
-    random_height_range = height - target_shape[0]
-    random_width_range = width - target_shape[1]
+    if (height,width) == target_shape:
+        return img
+    else:
+        random_height_range = height - target_shape[0]
+        random_width_range = width - target_shape[1]
 
-    if random_width_range <0 or random_height_range<0:
-        print('臣妾暂时还做不到!!!')
-        traceback.print_exc()
-        return 'error'
+        if random_width_range <0 or random_height_range<0:
+            print('臣妾暂时还做不到!!!')
+            traceback.print_exc()
+            return 'error'
 
+        if random_height_range == 0:
+            random_height =0
+        else:
+            random_height = np.random.randint(0,random_height_range)
 
-    random_height = np.random.randint(0,random_height_range)
-    random_width = np.random.randint(0,random_width_range)
+        if random_width_range == 0:
+            random_width =0
+        else:
+            random_width = np.random.randint(0, random_width_range)
 
-    return img[random_height:random_height+target_shape[0],random_width:random_width+target_shape[1]]
+        return img[random_height:random_height+target_shape[0],random_width:random_width+target_shape[1]]
 
 
 if __name__ == '__main__':

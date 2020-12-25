@@ -652,14 +652,18 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
             print('请输入保存root路径')
         if os.path.exists(save_path) == False:
             print('请手动创建数据集root目录')
-
         tamper_path = 'tamper_result'
         tamper_poisson_path = 'tamper_poisson_result'
         ground_truth_path = 'ground_truth_result'
+        if not os.path.exists(os.path.join(save_path,tamper_path)):
+            os.makedirs(os.path.join(save_path,tamper_path))
+        if not os.path.exists(os.path.join(save_path,tamper_poisson_path)):
+            os.makedirs(os.path.join(save_path, tamper_poisson_path))
+        if not os.path.exists(os.path.join(save_path,ground_truth_path)):
+            os.makedirs(os.path.join(save_path, ground_truth_path))
+
+
         # os.makedirs(os.path.join(save_path,src))
-        # os.makedirs(os.path.join(save_path,tamper_path))
-        # os.makedirs(os.path.join(save_path,tamper_poisson_path))
-        # os.makedirs(os.path.join(save_path,ground_truth_path))
 
         image_format = ['.jpg', '.png', '.bmp']
         tptype = ['Default', 'poisson', 'Gt']
@@ -671,11 +675,14 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
         save_name = {'tamper_result': os.path.join(save_name_part1['tamper_result'], tptype[0] +save_name_part2+save_name_part3[np.random.randint(0,2)]),
                      'tamper_poisson_result': os.path.join(save_name_part1['tamper_poisson_result'], tptype[1] +save_name_part2+ save_name_part3[np.random.randint(0,2)]),
                      'ground_truth_result': os.path.join(save_name_part1['ground_truth_result'], tptype[2]+save_name_part2+save_name_part3[2])}
+
         if not os.path.isfile(save_name['tamper_result']):
             print(save_name['tamper_result'])
             if tamper_image is not None:
-                if type(tamper_image) == 'PIL':
+                if type(tamper_image) == type(Image.Image()):
                     tamper_image.save(save_name['tamper_result'])
+                elif type(tamper_image) == 'numpy.ndarray':
+                    (Image.fromarray(tamper_image)).save(save_name['tamper_result'])
                 else:
                     tamper_image = cv2.cvtColor(np.asarray(tamper_image),cv2.COLOR_RGB2BGR)
                     cv2.imwrite(save_name['tamper_result'], tamper_image)
@@ -695,8 +702,9 @@ def image_save_method(tamper_image, img=None, img1=None, tamper_poisson=None, gr
         if not os.path.isfile(save_name['ground_truth_result']):
             print(save_name['ground_truth_result'])
             if ground_truth is not None:
-                # ground_truth.save(save_name['ground_truth_result'])
-                cv2.imwrite(save_name['ground_truth_result'], ground_truth)
+                ground_truth = np.array(ground_truth,dtype='uint8')
+                ground_truth = Image.fromarray(ground_truth)
+                ground_truth.save(save_name['ground_truth_result'])
             else:
                 traceback.print_exc()
                 sys.exit()
@@ -713,7 +721,7 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
     cycle_flag = 0
     pylab.rcParams['figure.figsize'] = (10.0, 8.0)
     dataset_root = 'D:\\实验室\\图像篡改检测\\数据集\\COCO\\'
-    save_root_path = 'C:\\Users\\musk\\Desktop\\fix_bk'
+    save_root_path = 'D:\\实验室\\1127splicing'
     if dataset_root == None:
         print('输入的数据集为空')
         sys.exit()
@@ -721,7 +729,7 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
         dataDir = dataset_root
 
 
-    dataType = 'val2017'
+    dataType = 'train2017'
     annFile = '%s/annotations/instances_%s.json' % (dataDir, dataType)
     coco = COCO(annFile)
     cats = coco.loadCats(coco.getCatIds())
@@ -747,7 +755,7 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
 
                 # 判断随机出来的两幅图像符不符合要求
                 if judge_required_image(anns[0]['area'], (img['height'], img['width']), (img1['height'], img1['width']),
-                                        1000, size_threshold=0.2):
+                                        5000, size_threshold=0.2):
                     cycle_flag += 1
                     print('循环的次数为:', cycle_flag)
                     if cycle_flag >= 50:
@@ -772,9 +780,9 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
                 # tamper_raw_image, tamper_poisson_image, ground_truth = splicing_tamper_one_image(I, b1, mask)
 
 
-                # tamper_raw_image, tamper_poisson_image, ground_truth = paste_object_to_background(I,b1,mask,bbx,1,False)
+                tamper_raw_image, tamper_poisson_image, ground_truth = paste_object_to_background(I,b1,mask,bbx,1,False)
                 # tamper_raw_image, tamper_poisson_image, ground_truth = random_area_to_background(b1,mask,1)
-                tamper_raw_image, tamper_poisson_image, ground_truth = random_area_to_fix_background(b1, mask, 1)
+                # tamper_raw_image, tamper_poisson_image, ground_truth = random_area_to_fix_background(b1, mask, 1)
                 # plt.figure('tamper_raw_image')
                 # plt.imshow(tamper_raw_image[0])
                 # plt.show()
@@ -801,6 +809,12 @@ def main(cat_range=[1, 80], num_per_cat=100, area_constraint=[1000, 9999], optim
                 print(e)
     print('finished')
 
+#
+# class TamperDataGen:
+#     def __init__(self):
+#         pass
+#
 
 if __name__ == '__main__':
     main()
+

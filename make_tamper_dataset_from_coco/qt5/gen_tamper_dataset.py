@@ -13,12 +13,12 @@ from PIL import ImageFilter
 import argparse
 import sys
 import pdb
-from get_double_edge import mask_to_outeedge
-from image_Fusion import Possion
-import poisson_image_editing
+from qt5.get_double_edge import mask_to_outeedge
+
+
 import skimage.morphology as dilation
 import traceback
-import myCalImage
+import qt5.myCalImage
 
 matplotlib.use('Qt5Agg')
 

@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" autoUpload="Always" serverName="liu@10.21.243.59:22">
     <serverData>
-      <paths name="liu@10.21.243.59:22">
+      <paths name="liu@10.21.243.54:22">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="liu@10.21.243.59:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/liu/chenhaoran/make_tamper_dataset_from_coco" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
@@ -38,5 +45,6 @@
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>

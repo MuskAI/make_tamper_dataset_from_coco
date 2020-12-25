@@ -9,9 +9,9 @@ import sys
 import datetime
 import shutil
 import traceback
-DATASET_SRC_PATH = '/media/liu/File/Sp_320_dataset/tamper_result_320'
-DATASET_GT_PATH = '/media/liu/File/Sp_320_dataset/ground_truth_result_320'
-DATASET_TARGET_PATH = '/media/liu/File/12月新数据/After_divide/coco_splicing_no_poisson_after_divide1'
+DATASET_SRC_PATH = '/media/liu/File/8_20_dataset_after_divide/train_dataset_train_percent_0.80@8_20'
+DATASET_GT_PATH = '/media/liu/File/8_20_dataset_after_divide/train_gt_train_percent_0.80@8_20'
+DATASET_TARGET_PATH = '/media/liu/File/12月新数据/After_divide/coco_cm_after_divide2'
 
 
 class DataDivide:
@@ -37,13 +37,19 @@ class DataDivide:
 
 
 
-
         self.divide_mode_flag = 'num'
         self.train_num_you_want = 100
         self.train_percent = 0.7
         self.__path_issues()
         self.divide()
-
+    def __remove_poisson(self,data_list):
+        no_poisson_data_list = []
+        for idx,item in enumerate(data_list):
+            if 'poisson' not in item:
+                no_poisson_data_list.append(item)
+            else:
+                pass
+        return no_poisson_data_list
     def __switch_case(self, path):
         """
         针对不同类型的数据集做处理
@@ -143,6 +149,9 @@ class DataDivide:
         elif 'Sp_Default' in src_name:
             gt_name = src_name.replace('Default', 'Gt').replace('.jpg', '.bmp').replace('.png', '.bmp').replace('poisson',
                                                                                                             'Gt')
+        elif 'Default' in src_name and 'Sp_Default' not in src_name:
+            gt_name = src_name.replace('Default', 'Gt').replace('.jpg', '.bmp').replace('.png', '.bmp').replace('poisson',
+                                                                                                            'Gt')
         else:
             gt_name = src_name.replace('.png', '.bmp').replace('.jpg','.bmp')
         return gt_name
@@ -169,6 +178,7 @@ class DataDivide:
     def divide(self):
         train_percent = self.train_percent
         data_list = os.listdir(DATASET_SRC_PATH)
+        data_list = self.__remove_poisson(data_list)
         if self.divide_mode_flag =='percent':
             print('总共数据有：%d张' % len(data_list))
             print('训练:测试 = %d:%d' % (train_percent * 10, 10 - train_percent))
