@@ -9,9 +9,9 @@ import sys
 import datetime
 import shutil
 import traceback
-DATASET_SRC_PATH = '/media/liu/File/Sp_320_dataset/tamper_result_320'
-DATASET_GT_PATH = '/media/liu/File/Sp_320_dataset/ground_truth_result_320'
-DATASET_TARGET_PATH = '/media/liu/File/12月新数据/After_divide/coco_splicing_no_poisson_after_divide1'
+DATASET_SRC_PATH = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\1225_texture_and_coco_template_src'
+DATASET_GT_PATH = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\1225_texture_and_coco_template_gt'
+DATASET_TARGET_PATH = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\1225_texture_and_coco_template_after_divide'
 
 
 class DataDivide:
@@ -69,8 +69,8 @@ class DataDivide:
         debug_type = ['debug']
         template_type = ['TEMPLATE']
         type= []
-        name = path.split('/')[-1]
-        # name = path.split('\\')[-1]
+        # name = path.split('/')[-1]
+        name = path.split('\\')[-1]
         for sp_flag in sp_type:
             if sp_flag in name[:2]:
                type.append('sp')
@@ -138,11 +138,12 @@ class DataDivide:
         使用src根据名字去寻找对应的GT
         :return:
         """
-        if 'COD10K' in src_name:
+        if True:
+            gt_name = src_name.replace('.png', '.bmp').replace('.jpg', '.bmp')
+        elif 'COD10K' in src_name:
             gt_name = src_name.replace('.png', '.bmp').replace('.jpg','.bmp').replace('tamper','Gt')
         elif 'Sp_Default' in src_name:
-            gt_name = src_name.replace('Default', 'Gt').replace('.jpg', '.bmp').replace('.png', '.bmp').replace('poisson',
-                                                                                                            'Gt')
+            gt_name = src_name.replace('Default', 'Gt').replace('.jpg', '.bmp').replace('.png', '.bmp').replace('poisson','Gt')
         else:
             gt_name = src_name.replace('.png', '.bmp').replace('.jpg','.bmp')
         return gt_name

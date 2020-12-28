@@ -66,6 +66,8 @@ class NegativeDataset():
                 continue
 
             t_img_crop = Image.fromarray(t_img_crop)
+            if len(t_img_crop.split())!=3:
+                continue
             t_img_crop.save(os.path.join(save_path, img))
             print('\r', 'Saving process: %d/%d'%(index, len(image_list)), end='')
 
@@ -91,7 +93,7 @@ class NegativeDataset():
         return np.zeros([target_shape[0],target_shape[1]],dtype='uint8')
     def rename(self,path):
         for index, item in enumerate(os.listdir(path)):
-            os.rename(os.path.join(path,item),os.path.join(path,'negative_'+item))
+            os.rename(os.path.join(path,item),os.path.join(path,'negative_'+str(index) + '.png'))
             print('\r', 'The rename process: %d/%d'%(index, len(os.listdir(path))),end='')
 
     def negative_plus(self,dir_path):
@@ -120,6 +122,6 @@ class NegativeDataset():
             except:
                 traceback.print_exc()
 if __name__ == '__main__':
-    # NegativeDataset().coco(in_path='D:\\实验室\\图像篡改检测\\数据集\\COCO\\train2017',
-    #                        save_path='D:\\实验室\\图像篡改检测\\数据集\\COCO_320_CROP',number=10000)
-    NegativeDataset().rename(r'H:\10月数据准备\10月12日实验数据\negative\COCO_320_CROP')
+    # NegativeDataset().coco(in_path=r'H:\texture_filler\texture_for_tamper_task',
+    #                        save_path=r'C:\Users\musk\Desktop\negative\gt_texture',number=1000)
+    NegativeDataset().rename(r'C:\Users\musk\Desktop\negative\gt_texture')

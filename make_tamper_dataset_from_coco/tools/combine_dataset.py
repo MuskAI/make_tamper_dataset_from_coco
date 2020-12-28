@@ -62,7 +62,6 @@ class CombineDataset():
 
     def combine_cm_sp_cod10k(self,cm_dir,sp_dir,cod10k_dir,save_dir,base_num='average'):
         """
-
         :param cm_dir:
         :param sp_dir:
         :param cod10k_dir:
