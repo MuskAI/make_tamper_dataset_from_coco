@@ -18,14 +18,14 @@ class COD10K():
         self.img_path = img_path
         self.mask_path = mask_path
         self.img_save_root_path = img_save_path
-        self.img_tamper_save_path_ = os.path.join(img_save_path,'tamper_result_320_cod10k')
-        self.img_tamper_save_path = os.path.join(self.img_tamper_save_path_,'tamper_'+img_path.split('\\')[-1])
+        self.img_tamper_save_path_ = os.path.join(img_save_path,'src')
+        self.img_tamper_save_path = os.path.join(self.img_tamper_save_path_,'COD10K_tamper_'+img_path.split('\\')[-1])
 
         self.img_poisson_save_path_ = os.path.join(img_save_path,'tamper_poisson_result_320_cod10k')
         self.img_poisson_save_path = os.path.join(self.img_poisson_save_path_,'tamper_poisson_'+img_path.split('\\')[-1])
 
-        self.img_gt_save_path_ = os.path.join(img_save_path,'ground_truth_result_320_cod10k')
-        self.img_gt_save_path = os.path.join(self.img_gt_save_path_,'tamper_gt_' + mask_path.split('\\')[-1])
+        self.img_gt_save_path_ = os.path.join(img_save_path,'gt')
+        self.img_gt_save_path = os.path.join(self.img_gt_save_path_,'COD10K_tamper_gt_' + mask_path.split('\\')[-1])
 
         self.tamper_num =1
         self.bk_shape = (320,320)
@@ -40,7 +40,7 @@ class COD10K():
             print('输出文件夹创建成功')
 
         # 阈值
-        self.area_percent_threshold = 0.5
+        self.area_percent_threshold = 0.6
         self.bbox_threshold = 0.1
 
         pass
@@ -219,21 +219,6 @@ class COD10K():
             background = Image.fromarray(oringal_background)
             mask = bk_mask
             try:
-                # poisson_foreground = cv.cvtColor(np.asarray(foreground.convert('RGB')), cv.COLOR_RGB2BGR)
-                # poisson_background = cv.cvtColor(np.asarray(background), cv.COLOR_RGB2BGR)
-                # poisson_mask = np.asarray(mask)
-                # poisson_mask = np.where(poisson_mask == 1, 255, 0)
-                # poisson_fusion_image = poisson_image_editing.poisson_fusion(poisson_foreground, poisson_background,
-                #                                                             poisson_mask)
-                # poisson_fusion_image = Image.fromarray(cv.cvtColor(poisson_fusion_image, cv.COLOR_BGR2RGB))
-                #
-                # #
-                # # plt.figure('123')
-                # # plt.imshow(poisson_fusion_image)
-                # # plt.show()
-                # tamper_poisson.append(poisson_fusion_image)
-                # # return tamper_image, tamper_poisson, tamper_gt
-
                 # 保存
                 for index,t_img in enumerate(tamper_image):
                     t_img = Image.fromarray(t_img)
@@ -251,7 +236,7 @@ class COD10K():
 if __name__ == '__main__':
     img_path = 'H:\\COD10K_resize\\src'
     mask_path = 'H:\\COD10K_resize\\GT'
-    img_save_root_path = 'H:\\COD10K_resize\\save3'
+    img_save_root_path = 'H:\\COD10K_resize\\save'
     img_path_list = []
     mask_path_list = []
     for index,t_img_path in enumerate(os.listdir(img_path)):

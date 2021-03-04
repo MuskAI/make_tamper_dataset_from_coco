@@ -18,7 +18,7 @@ import image_crop,os
 import matplotlib.pyplot as plt
 import random
 
-
+from rich.progress import track
 class CopyMove:
     """
     这个类是解决cm问题的类
@@ -194,11 +194,11 @@ class CopyMove:
 
 class NoPeriodicTextureData(CopyMove):
     def __init__(self):
-        self.src_dir = r'H:\texture_filler\texture_for_tamper_task'
+        self.src_dir = r'D:\实验室\stex-1024'
         self.gt_dir = r'H:\8_20_dataset_after_divide\test_gt_train_percent_0.80@8_20'
-        self.save_dir = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\no_periodic_texture_dataset122'
-        self.save_src_dir = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\no_periodic_texture_dataset122\train_src'
-        self.save_gt_dir = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\no_periodic_texture_dataset122\train_gt'
+        self.save_dir = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\no_periodic_texture_dataset0109'
+        self.save_src_dir = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\no_periodic_texture_dataset0109\train_src'
+        self.save_gt_dir = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\no_periodic_texture_dataset0109\train_gt'
         self.rotation_flag = True
         self.__path_issues()
         super(NoPeriodicTextureData).__init__()
@@ -219,7 +219,7 @@ class NoPeriodicTextureData(CopyMove):
     def gen_data(self,background=None, mask=None):
         src_list = os.listdir(self.src_dir)
         mask_list = os.listdir(self.gt_dir)
-        for idx, item in enumerate(src_list):
+        for idx, item in enumerate(track(src_list)):
             print(idx,'/',len(src_list))
             src_path = os.path.join(self.src_dir,item)
             random_gt_list = []
@@ -250,7 +250,7 @@ class NoPeriodicTextureData(CopyMove):
                 gt = gt[0]
                 src = Image.fromarray(src)
                 gt = Image.fromarray(gt).convert('RGB')
-                src_name = item.split('.')[0] + '('+random_gt.split('.')[0] + ')(%d_%d_%d_%d_%d)' % row_and_col + '.'+item.split('.')[1]
+                src_name = item.split('.')[0] + '('+random_gt.split('.')[0] + ')(%d_%d_%d_%d_%d)' % row_and_col + '.png'
                 src_save_path = os.path.join(self.save_src_dir,src_name)
                 gt_save_path = os.path.join(self.save_gt_dir,src_name)
 

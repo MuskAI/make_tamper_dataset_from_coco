@@ -14,6 +14,10 @@ import warnings
 import traceback
 import skimage.morphology as dilation
 import random
+from image_crop import crop as my_crop
+import rich
+from rich.progress import track
+
 class TamperDataset:
     def __init__(self, src_dir, mask_dir, workshop_dir):
         """
@@ -319,8 +323,6 @@ class TamperDataset:
 
         return img[random_height:random_height + target_shape[0], random_width:random_width + target_shape[1]],\
                (random_height,random_width)
-from image_crop import crop as my_crop
-
 
 class TextureData:
     """
@@ -333,8 +335,6 @@ class TextureData:
     """
     def __init__(self):
         pass
-
-
 
 class TextureTamperDataset(TamperDataset):
     def __init__(self,src_dir, mask_dir, workshop_dir):
@@ -349,8 +349,8 @@ class GenTpFromTemplate:
         self.image_dir = image_dir
         self.template_list = os.listdir(template_dir)
         self.image_list = os.listdir(image_dir)
-        self.tp_image_save_dir = 'D:/Image_Tamper_Project/Lab_project_code/TempWorkShop/1225_texture_and_coco_template_src'
-        self.tp_gt_save_dir = 'D:/Image_Tamper_Project/Lab_project_code/TempWorkShop/1225_texture_and_coco_template_gt'
+        self.tp_image_save_dir = 'D:/Image_Tamper_Project/Lab_project_code/TempWorkShop/0108_texture_and_casia_template_src'
+        self.tp_gt_save_dir = 'D:/Image_Tamper_Project/Lab_project_code/TempWorkShop/0108_texture_and_casia_template_gt'
 
         if os.path.exists(self.tp_image_save_dir):
             pass
@@ -377,7 +377,7 @@ class GenTpFromTemplate:
         template_list = self.template_list
         image_list = self.image_list
 
-        for idx,item in enumerate(template_list):
+        for idx,item in enumerate(track(template_list)):
             gt_name = item
             print('%d / %d'%(idx,len(template_list)))
             I = Image.open(os.path.join(template_dir,item))
@@ -500,7 +500,6 @@ class GenTpFromTemplate:
         pass
 
 
-
 class GenMultiTpFromTemplate(GenTpFromTemplate):
     def __init__(self,template_dir=None, image_dir=None):
         template_dir1 = 'D:\Image_Tamper_Project\Lab_project_code\Image-Tamper-Detection\make_tamper_dataset_from_coco\TempWorkShop\gt'
@@ -514,7 +513,11 @@ class GenMultiTpFromTemplate(GenTpFromTemplate):
         image_dir2 = 'D:\实验室\图像篡改检测\篡改检测公开数据\CASIA\CASIA 2.0\CASIA 2.0\Au'
         image_dir3 = r'C:\Users\musk\Desktop\smooth5\texture'
         image_dir4 = r'H:\texture_filler\texture_for_tamper_task'
-        image_dir = image_dir4
+        image_dir5 = r'D:\实验室\stex-1024'
+        image_dir = image_dir5
+
+        self.tp_image_save_dir = 'D:/Image_Tamper_Project/Lab_project_code/TempWorkShop/0108_texture_and_casia_template_src'
+        self.tp_gt_save_dir = 'D:/Image_Tamper_Project/Lab_project_code/TempWorkShop/0108_texture_and_casia_template_gt'
 
         super(GenMultiTpFromTemplate, self).__init__(template_dir,image_dir)
 
@@ -533,7 +536,7 @@ class GenMultiTpFromTemplate(GenTpFromTemplate):
         template_list = self.template_list
         image_list = self.image_list
 
-        for idx,item in enumerate(template_list):
+        for idx,item in enumerate(track(template_list)):
             gt_name = item
             print('%d / %d'%(idx,len(template_list)))
             I_gt = Image.open(os.path.join(template_dir,item))
@@ -570,8 +573,7 @@ class GenMultiTpFromTemplate(GenTpFromTemplate):
                     img_1 = self.resize_and_crop(img_1)
                     img_2 = self.resize_and_crop(img_2)
                     if img_1==False or img_2==False:
-                        traceback.print_exc()
-                        exit(1)
+                        continue
                     else:
                         pass
 
@@ -631,6 +633,7 @@ class GenMultiTpFromTemplate(GenTpFromTemplate):
         if img_size[0] < width or img_size[1] < height:
             # 这里开始resize
             img = img.resize((width, height), Image.ANTIALIAS)
+            return False
         elif img_size[0] >= width or img_size[1] >= height:
             if self.resize_flag == True:
                 # do resize process

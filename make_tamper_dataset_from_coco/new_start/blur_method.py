@@ -62,11 +62,6 @@ class MyBlur:
                 # big to small
                 img_blur_list.append(img.filter(ImageFilter.GaussianBlur(radius=radius)))
                 img_blur_list[idx] = np.array(img_blur_list[idx], dtype='uint8')
-                # plt.figure()
-                # plt.imshow(img_blur_list[idx])
-                # plt.show()
-
-            # img = img.filter(ImageFilter.MedianFilter())
 
         else:
             print('done nothing')
