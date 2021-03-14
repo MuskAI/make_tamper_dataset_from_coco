@@ -44,7 +44,7 @@ class AreaToEdge:
 
         # TODO 3: 是否需要检查
         if self.check:
-            self.check_convert_result(area_img,gt_img,edge_img)
+            self.check_convert_result(area_img, gt_img, edge_img)
 
 
         # TODO 4: 选择是否保存在指定文件下
@@ -123,7 +123,7 @@ class AreaToEdge:
 
 
 if __name__ == '__main__':
-    ATE = AreaToEdge(check=True)
+    ATE = AreaToEdge(check=False)
     area_img_path = r'C:\Users\musk\Desktop\mantranet_output\mask\1t.bmp'
     gt_path = r'C:\Users\musk\Desktop\mantranet_output\gt\1t.bmp'
     ATE.convert(area_img_path=area_img_path, gt_img_path=gt_path)

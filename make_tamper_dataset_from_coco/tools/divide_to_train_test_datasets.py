@@ -9,9 +9,9 @@ import sys
 import datetime
 import shutil
 import traceback
-DATASET_SRC_PATH = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\0108_texture_and_casia_template_src'
-DATASET_GT_PATH = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\0108_texture_and_casia_template_gt'
-DATASET_TARGET_PATH = r'D:\Image_Tamper_Project\Lab_project_code\TempWorkShop\0108_texture_and_casia_template_divide1'
+DATASET_SRC_PATH = r'G:\3月最新数据\periodic_texture\train_src'
+DATASET_GT_PATH = r'G:\3月最新数据\periodic_texture\train_gt'
+DATASET_TARGET_PATH = r'G:\3月最新数据\periodic_texture\divide'
 
 
 class DataDivide:
