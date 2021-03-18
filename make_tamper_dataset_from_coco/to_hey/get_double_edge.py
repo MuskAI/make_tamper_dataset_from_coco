@@ -1,6 +1,8 @@
 import numpy as np
 import skimage.morphology as dilation
-def __mask_to_double_edge(self, orignal_mask):
+from PIL import Image
+import matplotlib.pylab as plt
+def mask_to_double_edge(orignal_mask):
     """
     :param orignal_mask: 输入的是 01 mask图
     :return: 255 100 50 mask 图
@@ -26,3 +28,16 @@ def __mask_to_double_edge(self, orignal_mask):
 
     except Exception as e:
         print(e)
+
+
+if __name__ == '__main__':
+    pred = Image.open('../for_compare_experiment/test/39t.bmp')
+    pred = np.array(pred)
+    pred = np.where(pred>127,1,0)
+    plt.imshow(pred)
+    plt.show()
+    pred = mask_to_double_edge(pred)
+    _pred = Image.fromarray(pred)
+    _pred.save('to_edge.bmp')
+    plt.imshow(pred,cmap='gray')
+    plt.show()
