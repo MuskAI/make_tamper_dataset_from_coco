@@ -155,19 +155,21 @@ class ToleranceMetrics:
 
                 f1 = f1_score(y_pred=dou_pred.reshape(-1), y_true=dou_gt.reshape(-1), zero_division=0)
 
-                recall = precision_score(y_pred=dou_pred.reshape(-1), y_true=dou_gt.reshape(-1), zero_division=0)
+                precision = precision_score(y_pred=dou_pred.reshape(-1), y_true=dou_gt.reshape(-1), zero_division=0)
 
-                precision = recall_score(y_pred=dou_pred.reshape(-1), y_true=dou_gt.reshape(-1), zero_division=0)
+                recall = recall_score(y_pred=dou_pred.reshape(-1), y_true=dou_gt.reshape(-1), zero_division=0)
+                acc = accuracy_score(y_pred=dou_pred.reshape(-1), y_true=dou_gt.reshape(-1))
+
                 # print(recall)
             except Exception as e:
                 _ = Image.fromarray(pred)
-                _.resize((dou.gt.shape[0],dou.gt.shape[1]))
+                _.resize((gt.shape[0],gt.shape[1]))
                 pred = np.array(dou_pred)
                 print('Scale the image')
                 continue
 
 
-        return {'f1': f1, 'precision': precision, 'recall': recall}
+        return {'f1': f1, 'precision': precision, 'recall': recall,'acc':acc}
 
 
     def tx_f1_precision_recall(self, pred_path, gt_path, edge_mode='area', tolerance=1):
@@ -255,7 +257,7 @@ if __name__ == '__main__':
           r'D:\lab\tamper_detection\public_data\CASIA\gt',
           r'D:\lab\tamper_detection\public_data\coverage\MY_COVERAGE_DATA\gt']
     tm = ToleranceMetrics()
-    pred_dir = os.path.join(pred[3])
+    pred_dir = os.path.join(pred[0])
     gt_dir = os.path.join(gt[1])
     pred_list = os.listdir(pred_dir)
     gt_list = os.listdir(gt_dir)
@@ -263,6 +265,7 @@ if __name__ == '__main__':
     f1_avg=0
     precision_avg=0
     recall_avg=0
+    acc_avg = 0
     error_list = []
     for idx, item in enumerate(tqdm(pred_list)):
         _pred_path = os.path.join(pred_dir, item)
@@ -278,12 +281,13 @@ if __name__ == '__main__':
             continue
 
         try:
-            # result = tm.t0f1(pred_path=_pred_path, gt_path=_gt_path,edge_mode='area')
+            result = tm.t0f1(pred_path=_pred_path, gt_path=_gt_path,edge_mode='area')
 
-            result = tm.tx_f1_precision_recall(pred_path=_pred_path, gt_path=_gt_path,tolerance=3,edge_mode='edge')
+            # result = tm.tx_f1_precision_recall(pred_path=_pred_path, gt_path=_gt_path,tolerance=3,edge_mode='edge')
             f1_avg += result['f1']
-            precision_avg += result['precision']
+            precision_avg += result['precision']vg =
             recall_avg += result['recall']
+            acc_avg = result['acc']
         except Exception as e:
             print(e)
             error_list.append(item)
@@ -301,4 +305,5 @@ if __name__ == '__main__':
     print('precision_avg:', precision_avg)
     print('recall_avg:', recall_avg)
     print('f1_avg:', f1_avg)
+    print('acc_avg:',acc_avg)
 
